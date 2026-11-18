@@ -102,6 +102,16 @@ and run your code with the same compiler, get the matching nightly from
 
     gh release download nightly-2026-11-03-34bd006 -R roc-lang/nightlies -p 'roc_nightly-linux_x86_64-*.tar.gz'
 
+## Companion: roc-ast
+
+[roc-ast](https://github.com/showell/roc-ast) is roc-types' companion.
+roc-types gives the type of every expression and pattern, but it needs a
+whole app that checks. roc-ast gives the syntax of any one file, Roc's own
+parse tree, even for code that won't type-check. So a tool reads the tree
+from roc-ast and asks roc-types only where a type decides. Both print spans
+the same way, lines and byte columns from 1 with an exclusive end, so a
+tree's node and a type's record meet by their spans.
+
 ## The pin: one Roc nightly
 
 Roc's new compiler is published as nightly builds, and its type checker
@@ -136,7 +146,8 @@ visitor and prints each node's kind, region and type. The header comment of
 [Shale](https://github.com/showell/shale) is a scripting tool whose
 [Roc recipes](https://github.com/showell/shale/blob/master/cookbook/roc/README.md)
 check and rewrite Roc code. They read the syntax tree from Roc's own parser,
-and roc-types gives them what syntax alone can't:
+through [roc-ast](https://github.com/showell/roc-ast), and roc-types gives
+them what syntax alone can't:
 
 - [rewrite_method_calls](https://github.com/showell/shale/blob/master/cookbook/roc/rewrite_method_calls.shale)
   turns `List.map(xs, f)` into `xs.map(f)`, but only where that is the same
