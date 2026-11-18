@@ -1,0 +1,94 @@
+# roc-types built into the asset install.shale installs, on demand only
+# (`gh workflow run build.yml -f ref=<ref>`), never on a push or a PR: it
+# links most of Roc's compiler. The tarball is the run's artifact
+# (`gh run download`), its sha256 in the log; publishing it as a release of
+# this repo, and moving `release` to it, is by hand.
+name: build
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "The roc-types branch, tag or commit to build"
+        default: master
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+          path: roc-types
+
+      # roc-types builds with the Zig the pinned Roc builds with, which
+      # zig-version names.
+      - name: Install Zig
+        working-directory: roc-types
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/showell/patched-zig-compiler/main/tools/get_zig.sh | sh
+          echo "$HOME/zig-$(tr -d '[:space:]' < zig-version)" >> "$GITHUB_PATH"
+
+      # The archive build.zig.zon pins leaves out vendor/, which Roc's
+      # modules import, so the build forks to a full checkout of the commit.
+      - name: Roc at the pin
+        run: |
+          commit=$(grep -o 'archive/[0-9a-f]*' roc-types/build.zig.zon | cut -d/ -f2)
+          git init -q roc && cd roc
+          git remote add origin https://github.com/roc-lang/roc.git
+          git fetch -q --depth 1 origin "$commit"
+          git checkout -q FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$commit"
+
+      - name: Build roc-types
+        working-directory: roc-types
+        run: |
+          zig version
+          zig build --fork="$GITHUB_WORKSPACE/roc" -Dtarget=x86_64-linux-musl -Dcpu=baseline --prefix "$GITHUB_WORKSPACE/out"
+          test -x "$GITHUB_WORKSPACE/out/bin/roc-types"
+
+      # The header is the format's and the pin's (FORMAT.md), and a type
+      # module the app imports has its types.
+      - name: Smoke
+        working-directory: roc-types
+        run: |
+          format=$(sed -n 's/^const format = \([0-9]*\);$/\1/p' main.zig)
+          version=$(tr -d '[:space:]' < roc-version)
+          "$GITHUB_WORKSPACE/out/bin/roc-types" tests/imported/main.roc > /tmp/types.out
+          test "$(head -n 1 /tmp/types.out)" = "roc-types $format $version"
+          grep -q '^== /.*/tests/imported/Greeting.roc$' /tmp/types.out
+          grep -cP '^t\t' /tmp/types.out
+
+      # The fixtures of test.shale, which holds them to their records: an
+      # app whose package has a package of its own and an app on the Echo
+      # platform are checked, and one with a type error in the inner package
+      # is refused. An asset that fails here is never built.
+      - name: Fixtures
+        working-directory: roc-types
+        run: |
+          bin="$GITHUB_WORKSPACE/out/bin/roc-types"
+          "$bin" tests/nested/app/main.roc > /tmp/nested.out
+          grep -q '^== /.*/tests/nested/inner/Inner.roc$' /tmp/nested.out
+          "$bin" tests/echo/main.roc > /tmp/echo.out
+          grep -q '^== /.*/tests/echo/main.roc$' /tmp/echo.out
+          if "$bin" tests/broken/app/main.roc > /tmp/broken.out; then exit 1; fi
+          if grep -q '^== ' /tmp/broken.out; then exit 1; fi
+
+      - name: Tarball
+        id: tarball
+        working-directory: roc-types
+        run: |
+          format=$(sed -n 's/^const format = \([0-9]*\);$/\1/p' main.zig)
+          test -n "$format"
+          short=$(tr -d '[:space:]' < roc-version | sed 's/.*-//')
+          name="roc-types-$format-$short-linux-x86_64.tar.gz"
+          tar -czf "$GITHUB_WORKSPACE/$name" -C "$GITHUB_WORKSPACE/out" bin/roc-types
+          cd "$GITHUB_WORKSPACE" && sha256sum "$name"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.tarball.outputs.name }}
+          path: ${{ steps.tarball.outputs.name }}

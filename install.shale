@@ -3,21 +3,20 @@
 -- roc-lang/roc's at the commit roc-version names, linked whole: building it
 -- takes more than the box holds beside its other work, so it is built on
 -- GitHub and installed from its published asset, never built here. The
--- asset's URL and sha256 are tools/roc_types/release, CI's too; the
--- download is held to the sha256 before anything is unpacked. Run from
--- Shale's checkout:
---   shale tools/roc_types/install.shale
+-- asset's URL and sha256 are `release`; the download is held to the
+-- sha256 before anything is unpacked. Run from this checkout:
+--   shale install.shale
 --
--- **A NEW PIN OR FORMAT IS A NEW ASSET**: run the roc-types workflow
--- (`gh workflow run roc-types.yml -f ref=<ref>`), which builds it static
+-- **A NEW PIN OR FORMAT IS A NEW ASSET**: run the build workflow
+-- (`gh workflow run build.yml -f ref=<ref>`), which builds it static
 -- for a baseline CPU and tars `bin/roc-types` as
--- `roc-types-<N>-<pin>-linux-x86_64.tar.gz`, printing its sha256; upload
--- it under that new name (a published asset never changes) and put its URL
--- and sha256 in tools/roc_types/release.
+-- `roc-types-<N>-<pin>-linux-x86_64.tar.gz`, printing its sha256; publish
+-- it as a release of showell/roc-types under a new name (a published asset
+-- never changes) and put its URL and sha256 in `release`.
 
-const RELEASE = "tools/roc_types/release"
+const RELEASE = "release"
 
-local version = trim(read("tools/roc_types/roc-version"))
+local version = trim(read("roc-version"))
 local parts = split(version, "-")
 local short = parts[#parts]
 
@@ -29,7 +28,7 @@ for l in lines(read(RELEASE)) do
 end
 if url == "" or sha == "" then fail("roc-types: " .. RELEASE .. " lacks its `url` or `sha256` line") end
 if starts_with(url, "TODO") or starts_with(sha, "TODO") then
-  fail("roc-types: " .. RELEASE .. " holds a placeholder: publish the roc-types workflow's asset and put its URL and sha256 there")
+  fail("roc-types: " .. RELEASE .. " holds a placeholder: publish the build workflow's asset and put its URL and sha256 there")
 end
 if find(url, "-" .. short .. "-") == nil then
   fail("roc-types: roc-version pins Roc " .. short .. ", and " .. RELEASE .. "'s asset is not that pin's (" .. url .. "): publish the pin's asset")

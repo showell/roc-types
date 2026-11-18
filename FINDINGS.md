@@ -44,4 +44,4 @@ triggers it.
 ### Decision
 
 Everything stays on Roc nightly 11-03, where roc-types already exists. The
-11-07 work stays on the branch `roc-types-1107`.
+11-07 work stays on the branch `roc-types-1107` on showell/shale.

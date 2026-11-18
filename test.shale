@@ -1,11 +1,11 @@
--- roc-types held to its fixtures, the apps in tools/roc_types/tests, each
--- run once and judged by its exit, the modules it writes and a few of its
--- records. Run from Shale's checkout:
---   shale tools/roc_types/test.shale
---   shale tools/roc_types/test.shale exe=scratch:roc-types-build/bin/roc-types
+-- roc-types held to its fixtures, the apps in tests/, each run once and
+-- judged by its exit, the modules it writes and a few of its records. Run
+-- from this checkout:
+--   shale test.shale
+--   shale test.shale exe=<mount>:<path>/bin/roc-types
 -- Without `exe=` it runs the roc-types installed for this tree's pin
 -- (`tools:roc-types-<pin>/bin/roc-types`, else `tools:roc-types/bin/roc-types`);
--- `exe=` names another, such as a roc-types workflow run's artifact before it
+-- `exe=` names another, such as a build workflow run's artifact before it
 -- is published. The fixtures:
 --   nested  an app whose package `outer` has a package of its own, `inner`,
 --           which the app's header does not name. `roc check` resolves it,
@@ -14,22 +14,24 @@
 --           written, the report naming inner's module;
 --   echo    an app that names no platform, so it runs on the Echo platform
 --           and `echo!` is in scope: checked, and its call of `echo!` typed;
+--   imported  an app that imports a type module beside it: the module's
+--           types written, its function's among them;
 --   notapp  a type module given as the root: refused as not an app.
--- The roc-types workflow's Fixtures step runs the first three on every
--- build, by their exits and modules alone.
+-- The build workflow's Smoke and Fixtures steps run the first four on every
+-- build, by their exits, modules and header alone.
 
 const EXE = arg("exe", "")
-const TESTS = "tools/roc_types/tests"
+const TESTS = "tests"
 
 function default_exe()
-  local pin = trim(read("tools/roc_types/roc-version"))
+  local pin = trim(read("roc-version"))
   local own = "tools:roc-types-" .. pin .. "/bin/roc-types"
   if exists(own) then return own end
   return "tools:roc-types/bin/roc-types"
 end
 
 -- The `== <path>` lines of a run's output, each path's end below the
--- checkout (`tools/roc_types/tests/...`), and its `t` records by module.
+-- checkout (`tests/...`), and its `t` records by module.
 function modules_of(out)
   local got = {paths = {}, records = {}}
   local path = ""
@@ -77,7 +79,7 @@ function judge(exe, name, root, want, failures)
 end
 
 local exe = EXE ~= "" and EXE or default_exe()
-if not exists(exe) then fail("roc-types test: no " .. exe .. ": `shale tools/roc_types/install.shale` installs it, or give exe=") end
+if not exists(exe) then fail("roc-types test: no " .. exe .. ": `shale install.shale` installs it, or give exe=") end
 print("roc-types test: " .. exe)
 local failures = {count = 0}
 judge(exe, "nested", TESTS .. "/nested/app/main.roc", {ok = true,
@@ -94,7 +96,13 @@ judge(exe, "echo", TESTS .. "/echo/main.roc", {ok = true,
     {module = TESTS .. "/echo/main.roc", record = "expr\te_lookup_local\t6\t2\t6\t7\tStr => {}"},
     {module = TESTS .. "/echo/main.roc", record = "expr\te_call\t6\t2\t6\t37\t{}"},
   }}, failures)
+judge(exe, "imported", TESTS .. "/imported/main.roc", {ok = true,
+  modules = {TESTS .. "/imported/main.roc", TESTS .. "/imported/Greeting.roc"},
+  records = {
+    {module = TESTS .. "/imported/Greeting.roc", record = "pat\tassign\t4\t2\t4\t7\tStr -> Str"},
+    {module = TESTS .. "/imported/main.roc", record = "expr\te_lookup_external\t8\t8\t8\t22\tStr -> Str"},
+  }}, failures)
 judge(exe, "notapp", TESTS .. "/nested/inner/Inner.roc", {ok = false,
   says = {"is not an app (NotAnAppHeader)"}}, failures)
-if failures.count > 0 then fail("roc-types test: " .. failures.count .. " of 4 fixtures failed") end
-print("roc-types test: 4 fixtures as they say")
+if failures.count > 0 then fail("roc-types test: " .. failures.count .. " of 5 fixtures failed") end
+print("roc-types test: 5 fixtures as they say")

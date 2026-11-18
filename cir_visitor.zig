@@ -1,6 +1,8 @@
 //! **VENDORED**: roc-lang/roc's `src/lsp/cir_visitor.zig` at the commit
 //! roc-version pins (beside this file), unchanged below this note. A new pin
-//! copies it again, so the walk is the pinned compiler's own.
+//! copies it again, so the walk is the pinned compiler's own. It is under
+//! Roc's license, the Universal Permissive License 1.0, copyright 2019
+//! Richard Feldman and subsequent Roc authors: LICENSE-ROC has it whole.
 //!
 //! Generic CIR (Canonicalized Intermediate Representation) visitor module
 //! for traversing the Roc compiler's CIR tree structure.

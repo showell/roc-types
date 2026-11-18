@@ -1,10 +1,9 @@
 //! `roc-types` (main.zig), built against roc-lang/roc's own checker, through
 //! its embedding API, at the commit its own roc-version pins (beside this
-//! file): roc-chat's, the Roc the code Shale's Roc recipes judge is built
-//! with. Its own build, not Shale's: Roc's build.zig runs as its dependency's.
-//! Built on GitHub (.github/workflows/roc-types.yml), never on the box:
-//! linking `compile` and `eval` builds most of the compiler, more than the
-//! box's two cores and 8 GB hold beside its other work.
+//! file): the Roc the code it reads is built with. Roc's build.zig runs as
+//! its dependency's. Built on GitHub (.github/workflows/build.yml): linking
+//! `compile` and `eval` builds most of the compiler, with LLVM, which takes
+//! more CPU and memory than a small machine has beside its other work.
 
 const std = @import("std");
 
@@ -25,7 +24,7 @@ pub fn build(b: *std.Build) void {
     const options = b.addOptions();
     options.addOption([]const u8, "roc_pin", pin);
     const target = b.standardTargetOptions(.{});
-    // ReleaseSafe unless asked: every Roc recipe runs this program, and Debug
+    // ReleaseSafe unless asked: a tool may run this program on every app, and Debug
     // takes about six times the CPU to print the same bytes.
     const optimize = b.option(std.builtin.Optimize, "optimize", "the mode to build in (default ReleaseSafe)") orelse .safe;
     const roc = b.dependency("roc", .{ .target = target, .optimize = optimize });

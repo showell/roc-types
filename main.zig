@@ -4,9 +4,8 @@
 //! compiler's own front end, the `BuildEnv` that `roc check` and the
 //! language server build with, then walks each checked module with the
 //! LSP's visitor (cir_visitor.zig) and writes one fact a line for a program
-//! (Shale's cookbook/roc/types.shale reads it). The checker is
-//! roc-lang/roc's, at the commit roc-version pins, so the types are what our
-//! compiler infers.
+//! to read. The checker is roc-lang/roc's, at the commit roc-version pins,
+//! so the types are what that compiler infers.
 //!
 //! It goes through `BuildEnv` rather than driving the `Coordinator` itself
 //! because `Coordinator.discoverAppFromPath` falls short of `roc check` in
@@ -18,32 +17,12 @@
 //! `BuildEnv` resolves the whole package graph and marks the root, as
 //! `roc check` does.
 //!
-//! **THE FORMAT**: the first line says the format and whose checker,
-//! `roc-types 1 <roc-version>`, written before anything else; a change a
-//! reader must know of is a new number. Then, for each module:
-//!   `== <path>`
-//!   `t<TAB>expr|pat<TAB>tag<TAB>line<TAB>col<TAB>end_line<TAB>end_col<TAB>type`
-//! The path is absolute and holds no `.` or `..` part. A `t` record is a
-//! node of the module's canonical tree: `tag` is its kind (`e_call`, a
-//! pattern's `assign`), the span is its region (lines and columns from 1, columns in
-//! bytes, the end one past, as roc-ast's), and `type` is the checker's, on
-//! one line as its type writer prints it, with `\`, tab, newline and carriage
-//! return escaped as `\\`, `\t`, `\n`, `\r`. Records come in the visitor's
-//! pre-order (a node before the nodes inside it), so of several nodes with
-//! one region (a `?`'s desugaring, a nominal tag, an `and`'s `if`) the
-//! outermost comes first.
-//!
-//! **NOTHING HALF-CHECKED**: every report goes to stderr, rendered, before
-//! any module. A warning only says so; a report of error severity, or a
-//! module the checker left failed or without its environment (named), ends
-//! the run with exit 1 and no module written. A reader holds a run that
-//! exits 0 to every module's types.
+//! **THE OUTPUT IS A CONTRACT**, and FORMAT.md is its home: the header line,
+//! the module and record lines, the exits, and the argument it takes. A
+//! change a reader must know of is a new `format` below and a new FORMAT.md.
 //!
 //! The argument is resolved to its real, absolute path here: the compiler
-//! refuses a relative entry ("Import Path Case Mismatch"). It must be an
-//! app, one that names a platform or one that runs on the Echo platform: a
-//! type module (no app header) is refused, `NotAnAppHeader`, so a type
-//! module's types are read through an app that imports it.
+//! refuses a relative entry ("Import Path Case Mismatch").
 
 const std = @import("std");
 const base = @import("base");
@@ -55,7 +34,7 @@ const BuildEnv = @import("compile").BuildEnv;
 const CirVisitor = @import("cir_visitor.zig").CirVisitor;
 const VisitAction = @import("cir_visitor.zig").VisitAction;
 
-/// The format's number, in its first line.
+/// The format's number, in its first line (FORMAT.md).
 const format = 1;
 
 const CIR = can.CIR;
