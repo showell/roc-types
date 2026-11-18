@@ -193,8 +193,10 @@ The workflow:
 - builds static, for `x86_64-linux-musl` at the baseline CPU, ReleaseSafe;
 - runs a smoke test and the fixtures, so a build that fails them makes no
   artifact;
-- tars `bin/roc-types` as `roc-types-<N>-<commit>-linux-x86_64.tar.gz` and
-  keeps it as the run's artifact, with its sha256 in the log.
+- tars `bin/roc-types` as `roc-types-<format>-<commit>-linux-x86_64.tar.gz`,
+  where `<format>` is the output format's number and `<commit>` is Roc's
+  short commit, and keeps it as the run's artifact, with its sha256 in the
+  log.
 
 To build on your own machine, follow the same steps; the workflow file has
 the exact commands.
@@ -225,7 +227,10 @@ name, and put its URL and sha256 in `release`. Then update this README: the
 nightly near the top and the install commands. A published asset never
 changes. The current asset was published as a release of
 [roc-apps](https://github.com/showell/roc-apps) before roc-types had a
-repository of its own, so `release` still points there.
+repository of its own, so `release` still points there. Its name,
+`roc-types-3-34bd006`, also predates the rule that an asset is named as the
+workflow builds it: its 3 is a build number kept by hand, not the format,
+which is 1.
 [FINDINGS.md](FINDINGS.md) records what was learned trying newer nightlies.
 
 ## Files

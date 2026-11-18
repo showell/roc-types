@@ -61,18 +61,26 @@ holds a run that exits 0 to every module's types.
 ## An example
 
 For `tests/imported/main.roc`, an app on a platform that imports a type
-module `Greeting`:
+module `Greeting`, the whole output:
 
     roc-types 1 nightly-2026-11-03-34bd006
-    == /home/me/roc-types/tests/nested/pf/main.roc
-    t	pat	assign	11	1	11	14	Str
-    t	expr	e_lookup_required	11	17	11	21	Str
     == /home/me/roc-types/tests/imported/main.roc
     t	pat	assign	8	1	8	5	Str
     t	expr	e_call	8	8	8	29	Str
     t	expr	e_lookup_external	8	8	8	22	Str -> Str
-    ...
+    t	expr	e_str	8	23	8	28	Str
+    t	expr	e_str_segment	8	24	8	27	Str
     == /home/me/roc-types/tests/imported/Greeting.roc
     t	pat	assign	4	2	4	7	Str -> Str
     t	expr	e_lambda	4	10	4	32	Str -> Str
-    ...
+    t	pat	assign	4	11	4	15	Str
+    t	expr	e_block	4	17	4	32	Str
+    t	pat	assign	4	26	4	30	Str
+    t	expr	e_lookup_local	4	26	4	30	Str
+    t	expr	e_interpolation	4	17	4	32	Str
+    t	expr	e_str_segment	4	18	4	24	Str
+    t	expr	e_lookup_local	4	26	4	30	Str
+    t	expr	e_str_segment	4	31	4	31	Str
+    == /home/me/roc-types/tests/nested/pf/main.roc
+    t	pat	assign	11	1	11	14	Str
+    t	expr	e_lookup_required	11	17	11	21	Str
