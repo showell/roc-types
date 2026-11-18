@@ -45,3 +45,18 @@ triggers it.
 
 Everything stays on Roc nightly 11-03, where roc-types already exists. The
 11-07 work stays on the branch `roc-types-1107` on showell/shale.
+
+## Roc nightly 11-15 with Zig 0.17.1: the assertion is gone (2026-11-18)
+
+Roc nightly 11-15 (`f25da45`) asks for Zig 0.17.1. roc-types built against
+it with Steve's patched Zig 0.17.1+patched.3, whose LLVM has assertions on,
+and passed every step, the smoke test and the fixtures included:
+[44216252731](https://github.com/showell/shale/actions/runs/44216252731)
+(branch `roc-types-1115`). The asset it made is
+`roc-types-1-f25da45-linux-x86_64.tar.gz`, sha256
+`0e7dfad2d1d136be8b024b7de9026d39df2319fd8ba763f8fc7164246e49958d`, kept
+only as the run's artifact.
+
+So the pin can move past 11-03 with no workaround, neither stock Zig nor a
+build without debug info. The move is roc-apps' and the box's together, since
+roc-types must be built against the Roc the code is built with.
