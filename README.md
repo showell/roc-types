@@ -3,6 +3,8 @@
 **roc-types prints the type of every expression and pattern in a Roc app, as
 Roc's own type checker infers it, as plain text that any program can read.**
 
+The code here was written by AI coding agents (Claude), with human supervision.
+
 A parser tells you the shape of Roc code. It can't tell you that `xs` is a
 `List(U8)` or that a function returns a `Bool`. roc-types can, because it
 runs the compiler's checker. That is what a lint, a refactoring tool, an
