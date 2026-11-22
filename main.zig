@@ -175,8 +175,11 @@ pub fn main(init: std.process.Init) !void {
     const cwd = try std.Io.Dir.cwd().realPathFileAlloc(io, ".", arena);
     // No cache manager, so every module is checked here and keeps its
     // types; and no executable artifacts, as the language server builds:
-    // the types are read, nothing is run.
-    var env = try BuildEnv.init(gpa, .single_threaded, 1, roc_target.RocTarget.detectNative(), cwd, io);
+    // the types are read, nothing is run. The specialization strategy
+    // chooses how runtime roots are lowered after checking, and nothing is
+    // lowered here, so it is `boxy`, as `roc`'s own bundler passes for a
+    // build with no runtime consumer.
+    var env = try BuildEnv.init(gpa, .single_threaded, 1, roc_target.RocTarget.detectNative(), cwd, io, .boxy);
     defer env.deinit();
     env.setFinalizeExecutableArtifacts(false);
 
