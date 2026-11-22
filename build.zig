@@ -35,6 +35,12 @@ pub fn build(b: *std.Build) void {
             .target = target,
             .optimize = optimize,
             .link_libc = true,
+            // No debug info in a release build, as Roc's own build.zig
+            // strips its release builds: with it, Zig 0.17.1+patched.3's LLVM
+            // stops on an assertion ("overlapping or duplicate fragments",
+            // DwarfExpression.cpp) compiling Roc's eval and compile modules
+            // at 15177e9.
+            .strip = optimize != .debug,
         }),
     });
     inline for (.{ "base", "can", "eval", "roc_target", "compile", "ctx", "types" }) |name| {
