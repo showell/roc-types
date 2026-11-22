@@ -5,8 +5,8 @@
     .minimum_zig_version = "0.17.0",
     .dependencies = .{
         .roc = .{
-            .url = "https://github.com/roc-lang/roc/archive/34bd0067266d4cd5ac941f044863e6a29671ddc0.tar.gz",
-            .hash = "roc-0.0.0-NAC9w-FA3gO-FtW9NQLB6zOND6Eq8qBBEkOacAbbqlZM",
+            .url = "https://github.com/roc-lang/roc/archive/15177e91f62cafddf5336c455e00e9f05427ac16.tar.gz",
+            .hash = "roc-0.0.0-NAC9w5OhkQOFw5MBykl8Ol0y7dgwo6QUWq-12U7ebO0J",
         },
     },
     .paths = .{ "build.zig", "build.zig.zon", "main.zig", "cir_visitor.zig" },

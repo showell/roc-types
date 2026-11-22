@@ -1,5 +1,7 @@
--- **ROC-TYPES, DOWNLOADED AND INSTALLED** where Shale may run it
--- (~/tools/roc-types/bin/roc-types, under the `tools` mount). The checker is
+-- **ROC-TYPES, DOWNLOADED AND INSTALLED** where Shale may run it, beside
+-- the other pins' (~/tools/roc-types-<pin>/bin/roc-types, under the `tools`
+-- mount), which cookbook/roc/types.shale's roc_types_exe and test.shale look
+-- for first. The checker is
 -- roc-lang/roc's at the commit roc-version names, linked whole: building it
 -- takes more than the box holds beside its other work, so it is built on
 -- GitHub and installed from its published asset, never built here. The
@@ -34,8 +36,9 @@ if find(url, "-" .. short .. "-") == nil then
   fail("roc-types: roc-version pins Roc " .. short .. ", and " .. RELEASE .. "'s asset is not that pin's (" .. url .. "): publish the pin's asset")
 end
 
-if not exists("tools:roc-types") then mkdir("tools:roc-types") end
-local dir = fresh_dir("tools:roc-types", "download")
+const HOME = "tools:roc-types-" .. version
+if not exists(HOME) then mkdir(HOME) end
+local dir = fresh_dir(HOME, "download")
 local tarball = real(dir) .. "/roc-types.tar.gz"
 must(run({"curl", "-fsSL", "-o", tarball, url}, {timeout_ms = 600000, tail = 20}))
 local summed = must(run({"sha256sum", tarball}, {timeout_ms = 60000, tail = 2}))
@@ -44,7 +47,7 @@ if got ~= sha then
   remove_tree(dir)
   fail("roc-types: the download's sha256 is " .. got .. ", not " .. RELEASE .. "'s " .. sha .. "; nothing installed")
 end
-must(run({"tar", "-xzf", tarball, "-C", real("tools:roc-types")}, {timeout_ms = 60000, tail = 20}))
+must(run({"tar", "-xzf", tarball, "-C", real(HOME)}, {timeout_ms = 60000, tail = 20}))
 remove_tree(dir)
-if not exists("tools:roc-types/bin/roc-types") then fail("roc-types: the asset held no bin/roc-types; nothing installed at ~/tools/roc-types/bin/roc-types") end
-print("roc-types: Roc " .. short .. "'s checker, installed at ~/tools/roc-types/bin/roc-types")
+if not exists(HOME .. "/bin/roc-types") then fail("roc-types: the asset held no bin/roc-types; nothing installed at ~/tools/" .. sub(HOME, 7) .. "/bin/roc-types") end
+print("roc-types: Roc " .. short .. "'s checker, installed at ~/tools/" .. sub(HOME, 7) .. "/bin/roc-types")
